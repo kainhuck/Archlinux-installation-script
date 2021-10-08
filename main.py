@@ -28,7 +28,6 @@ def check_network():
 
 def run_cmd(*cmd):
     cmd_str = " ".join(cmd)
-    print(cmd_str)
     code, output = subprocess.getstatusoutput(cmd_str)
     try:
         assert code == SUCCESS
@@ -42,14 +41,18 @@ def run_cmd(*cmd):
 def main():
     # ======================= 检查安装环境 ======================= #
     # 检查平台
+    print("正在检查安装平台信息...")
     if not check_platform():
         print("This script only for archlinux installation")
         sys.exit(0)
+    print("OK")
 
+    print("正在检查网络连接...")
     # 检查网络
     if not check_network():
         print("Please connect Internet")
         sys.exit(0)
+    print("OK")
 
     # 确定引导方式
     check_boot()
@@ -57,7 +60,9 @@ def main():
     # ======================= 下面是正式安装过程 ======================= #
 
     # 更新系统时间
+    print("正在更新系统时间...")
     run_cmd("timedatectl", "set-ntp", "true")
+    print("OK")
 
     # 磁盘分区
     output = run_cmd("fdisk", "-l")
@@ -70,7 +75,7 @@ def main():
             disks.append(each)
 
     if len(disks):
-        print("发现如下可用磁盘：")
+        print("发现如下可用磁盘:")
         for i in range(len(disks)):
             print(f"{i} - {disks[i]}")
     else:
