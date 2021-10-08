@@ -167,9 +167,9 @@ class Installation:
         """
         self.run_cmd(f'echo "{self.hostname}" > /etc/hostname')
         self.run_cmd('''tee /etc/hosts <<-'EOF'
-        127.0.0.1	localhost
-        ::1		localhost
-        EOF''')
+127.0.0.1	localhost
+::1		localhost
+EOF''')
 
     @just_run("设置网络")
     def set_network(self):
@@ -217,7 +217,7 @@ class Installation:
             self.run_cmd("pacman -S gdm gnome gnome-extra")
             self.run_cmd("systemctl enable gdm")
         elif self.desktop == PLASMA:
-            self.run_cmd("pacman -S plasma kde-applications")
+            self.run_cmd("pacman -S plasma kde-applications libdbusmenu-glib appmenu-gtk-module")
             self.run_cmd("systemctl enable sddm")
 
     @just_run("进行收尾工作")
