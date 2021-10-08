@@ -62,13 +62,16 @@ def disk_partition(*ops):
 
 
 class Installation:
-    def __init__(self, boot, desktop, disk, swap, hostname):
+    def __init__(self, boot, desktop, disk, swap, hostname, username, password, ucode):
         self.name = "base"
         self.boot = boot
         self.desktop = desktop
         self.disk = disk
         self.swap = swap
         self.hostname = hostname
+        self.username = username
+        self.password = password
+        self.ucode = ucode
 
     @staticmethod
     def run_cmd(cmd:str):
@@ -123,7 +126,7 @@ class Installation:
         """
         下载linux基础软件包
         """
-        self.run_cmd("pacstrap /mnt base base-devel linux linux-firmware vim openssh")
+        self.run_cmd(f"pacstrap /mnt base base-devel linux linux-firmware vim openssh {self.ucode}")
 
     @just_run("生成fstab文件")
     def gen_fstab(self):
@@ -196,13 +199,9 @@ class Installation:
         """
         设置普通用户
         """
-        username = input("请输入新用户名: ")
-        while username == "root":
-            username = input("用户名有误请重新输入: ")
-        passwd = input("请为管理员用户设置密码: ")
-        self.run_cmd(f'echo -e "{passwd}\\n{passwd}\\n" | passwd')
-        self.run_cmd(f"useradd -m -G wheel -s /bin/bash {username}")
-        self.run_cmd(f'echo -e "{passwd}\\n{passwd}\\n" | passwd {username}')
+        self.run_cmd(f'echo -e "{self.password}\\n{self.password}\\n" | passwd')
+        self.run_cmd(f"useradd -m -G wheel -s /bin/bash {self.username}")
+        self.run_cmd(f'echo -e "{self.password}\\n{self.password}\\n" | passwd {self.username}')
         self.run_cmd("sed -in-place -e 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers")
 
     @just_run("设置桌面环境")
@@ -281,7 +280,25 @@ def main():
 
     # hostname
     host = input("请输入hostname: ")
-    installation = Installation(boot, desktop, disks[choose_index], swap_mem, host)
+
+    # username & password
+    username = input("请输入新用户名: ")
+    while username == "root":
+        username = input("用户名有误请重新输入: ")
+    passwd = input("请为管理员用户设置密码: ")
+
+
+    # ucode
+    ucode = ""
+    code = int(input("脚本支持以下cpu:\n0. intel\n1. amd\n2. 其他\n请选择你的cpu类型: "))
+    while code not in (0, 1, 2):
+        code = int(input("输入有误请重新输入: "))
+    if code == 0:
+        ucode = "intel-ucode"
+    elif code == 1:
+        ucode = "amd-ucode"
+
+    installation = Installation(boot, desktop, disks[choose_index], swap_mem, host, username, passwd, ucode)
 
     # ======================= 下面是正式安装过程 ======================= #
     installation.update_datetime()
