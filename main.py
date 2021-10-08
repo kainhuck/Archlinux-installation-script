@@ -113,27 +113,5 @@ def main():
     # 结束工作
 
 
-def test():
-    disks_ = re.findall("(/dev/.+?: [0-9 .]+? .+?iB)", """Disk /dev/sda: 20 GiB, 21474836480 bytes, 41943040 sectors
-Disk model: VBOX HARDDISK
-Units: sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes
-
-
-Disk /dev/loop0: 673.11 MiB, 705802240 bytes, 1378520 sectors
-Units: sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 512 bytes / 512 bytes""")
-    disks = []
-    for each in disks_:
-        if "rom" in each or "loop" in each or "airoot" in each:
-            continue
-        else:
-            disks.append(each)
-    print(disks)
-
-
 if __name__ == '__main__':
     main()
-    # test()
