@@ -86,6 +86,10 @@ def main():
     while choose_index < 0 or choose_index >= len(disks):
         choose_index = int(input("输入的序号有误，请重新输入: "))
 
+    disk = disks[choose_index]
+    dev = disk.split(":")[0]
+    print(f"正在进行磁盘分区{dev}...")
+
     # 挂载分区
 
     # 安装系统及必要软件
@@ -131,5 +135,5 @@ I/O size (minimum/optimal): 512 bytes / 512 bytes""")
 
 
 if __name__ == '__main__':
-    # main()
-    test()
+    main()
+    # test()
