@@ -217,7 +217,7 @@ EOF''')
             self.run_cmd("pacman -S gdm gnome gnome-extra")
             self.run_cmd("systemctl enable gdm")
         elif self.desktop == PLASMA:
-            self.run_cmd("pacman -S plasma kde-applications libdbusmenu-glib appmenu-gtk-module")
+            self.run_cmd("pacman -S plasma kde-applications libdbusmenu-glib appmenu-gtk-module packagekit-qt5")
             self.run_cmd("systemctl enable sddm")
 
     @just_run("进行收尾工作")
