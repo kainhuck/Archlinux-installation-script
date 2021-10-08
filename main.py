@@ -1,4 +1,4 @@
-#!/user/bin/python
+#!/usr/bin/python
 # This is ArchLinux install script
 
 import os
@@ -68,6 +68,18 @@ def main():
             continue
         else:
             disks.append(each)
+
+    if len(disks):
+        print("发现如下可用磁盘：")
+        for i in range(len(disks)):
+            print(f"{i} - {disks[i]}")
+    else:
+        print("未发现可用磁盘，程序退出")
+        sys.exit(0)
+
+    choose_index = int(input("请从上面选择一个要安装的磁盘(输入序号): "))
+    while choose_index < 0 or choose_index >= len(disks):
+        choose_index = int(input("输入的序号有误，请重新输入: "))
 
     # 挂载分区
 
