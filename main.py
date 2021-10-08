@@ -141,7 +141,7 @@ def main():
         de = "plasma kde-applications alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics"
 
     ucode = ""
-    code = int(input("脚本支持以下cpu类型:\n0. intel\n1. amd\n2. 其他\n请选择环境: "))
+    code = int(input("脚本支持以下cpu类型:\n0. intel\n1. amd\n2. 其他\n请选择类型: "))
     while code not in (0, 1, 2):
         code = int(input("输入有误请重新输入"))
     if code == 0:
