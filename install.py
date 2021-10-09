@@ -326,7 +326,6 @@ def main():
     installation.disk_partition()
     installation.download_linux()
     installation.gen_fstab()
-    installation.chroot()
     installation.set_timezone()
     installation.set_locale()
     installation.set_host()
