@@ -76,11 +76,17 @@ class Installation:
     @staticmethod
     def run_cmd(cmd: str):
         """
-        运行命令 todo
+        运行命令
         """
         code = os.system(cmd)
         if code != 0:
             sys.exit(code)
+    
+    def run_cmd_chroot(self, cmd: str):
+        """
+        运行命令 arch-chroot
+        """
+        self.run_cmd(f"arch-chroot /mnt {cmd}")
 
     @just_run("更新系统时间")
     def update_datetime(self):
@@ -137,38 +143,31 @@ class Installation:
         """
         self.run_cmd("genfstab -U /mnt >> /mnt/etc/fstab")
 
-    @just_run("切换根目录")
-    def chroot(self):
-        """
-        切换根目录
-        """
-        self.run_cmd("arch-chroot /mnt")
-
     @just_run("设置时区")
     def set_timezone(self):
         """
         设置时区
         """
-        self.run_cmd("ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime")
-        self.run_cmd("hwclock --systohc")
+        self.run_cmd_chroot("ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime")
+        self.run_cmd_chroot("hwclock --systohc")
 
     @just_run("设置地区")
     def set_locale(self):
         """
         系统语言设置
         """
-        self.run_cmd("sed -in-place -e 's/#zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/g' /etc/locale.gen")
-        self.run_cmd("sed -in-place -e 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen")
-        self.run_cmd("locale-gen")
-        self.run_cmd('echo "LANG=en_US.UTF-8" > /etc/locale.conf')
+        self.run_cmd_chroot("sed -in-place -e 's/#zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/g' /etc/locale.gen")
+        self.run_cmd_chroot("sed -in-place -e 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen")
+        self.run_cmd_chroot("locale-gen")
+        self.run_cmd_chroot('echo "LANG=en_US.UTF-8" > /etc/locale.conf')
 
     @just_run("设置host")
     def set_host(self):
         """
         设置系统host
         """
-        self.run_cmd(f'echo "{self.hostname}" > /etc/hostname')
-        self.run_cmd('''tee /etc/hosts <<-'EOF'
+        self.run_cmd_chroot(f'echo "{self.hostname}" > /etc/hostname')
+        self.run_cmd_chroot('''tee /etc/hosts <<-'EOF'
 127.0.0.1	localhost
 ::1		localhost
 EOF''')
@@ -178,9 +177,9 @@ EOF''')
         """
         设置系统网络：包括下载，自启动
         """
-        self.run_cmd("pacman -S dhcpcd networkmanager")
-        self.run_cmd("systemctl enable dhcpcd")
-        self.run_cmd("systemctl enable NetworkManager")
+        self.run_cmd_chroot("pacman -S dhcpcd networkmanager")
+        self.run_cmd_chroot("systemctl enable dhcpcd")
+        self.run_cmd_chroot("systemctl enable NetworkManager")
 
     @just_run("设置grub引导")
     def set_grub(self):
@@ -188,23 +187,23 @@ EOF''')
         设置grub引导
         """
         if self.boot == UEFI:
-            self.run_cmd("pacman -S grub efibootmgr")
-            self.run_cmd("grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=GRUB")
-            self.run_cmd("grub-mkconfig -o /boot/grub/grub.cfg")
+            self.run_cmd_chroot("pacman -S grub efibootmgr")
+            self.run_cmd_chroot("grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=GRUB")
+            self.run_cmd_chroot("grub-mkconfig -o /boot/grub/grub.cfg")
         elif self.boot == BIOS:
-            self.run_cmd("pacman -S grub")
-            self.run_cmd(f"grub-install {self.disk}")
-            self.run_cmd("grub-mkconfig -o /boot/grub/grub.cfg")
+            self.run_cmd_chroot("pacman -S grub")
+            self.run_cmd_chroot(f"grub-install {self.disk}")
+            self.run_cmd_chroot("grub-mkconfig -o /boot/grub/grub.cfg")
 
     @just_run("设置用户名和密码")
     def set_user(self):
         """
         设置普通用户
         """
-        self.run_cmd(f'echo -e "{self.password}\\n{self.password}\\n" | passwd')
-        self.run_cmd(f"useradd -m -G wheel -s /bin/bash {self.username}")
-        self.run_cmd(f'echo -e "{self.password}\\n{self.password}\\n" | passwd {self.username}')
-        self.run_cmd("sed -in-place -e 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers")
+        self.run_cmd_chroot(f'echo -e "{self.password}\\n{self.password}\\n" | passwd')
+        self.run_cmd_chroot(f"useradd -m -G wheel -s /bin/bash {self.username}")
+        self.run_cmd_chroot(f'echo -e "{self.password}\\n{self.password}\\n" | passwd {self.username}')
+        self.run_cmd_chroot("sed -in-place -e 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers")
 
     @just_run("设置桌面环境")
     def set_desktop(self):
@@ -213,21 +212,20 @@ EOF''')
         """
         if self.desktop == NO_DESKTOP:
             return
-        self.run_cmd("pacman -S xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics")
-        self.run_cmd("pacman -S ttf-dejavu wqy-microhei git wget curl")
+        self.run_cmd_chroot("pacman -S xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics")
+        self.run_cmd_chroot("pacman -S ttf-dejavu wqy-microhei git wget curl")
         if self.desktop == GNOME:
-            self.run_cmd("pacman -S gdm gnome gnome-extra")
-            self.run_cmd("systemctl enable gdm")
+            self.run_cmd_chroot("pacman -S gdm gnome gnome-extra")
+            self.run_cmd_chroot("systemctl enable gdm")
         elif self.desktop == PLASMA:
-            self.run_cmd("pacman -S plasma kde-applications libdbusmenu-glib appmenu-gtk-module packagekit-qt5")
-            self.run_cmd("systemctl enable sddm")
+            self.run_cmd_chroot("pacman -S plasma kde-applications libdbusmenu-glib appmenu-gtk-module packagekit-qt5")
+            self.run_cmd_chroot("systemctl enable sddm")
 
     @just_run("进行收尾工作")
     def finish(self):
         """
         收尾工作
         """
-        self.run_cmd("exit")
         self.run_cmd("umount -R /mnt")
 
 
