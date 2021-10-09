@@ -5,6 +5,14 @@
 archlinux的安装脚本，可选择`Gnome`或者`plasma`桌面（推荐选择 plasma 桌面）
 在执行安装任务前需要输入配置，这确认回车前，不会对系统做任何修改
 
+**使用**
+
+```shell
+curl -o install.py https://github.com/kainhuck/Archlinux-installation-script/releases/download/v1.0/install.py
+chmod +x install.py
+./install.py
+```
+
 ## todo
 
 1. setup.py  安装后的配置
