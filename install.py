@@ -78,6 +78,7 @@ class Installation:
         """
         运行命令
         """
+        print(f"RUN >>> {cmd}")
         code = os.system(cmd)
         if code != 0:
             sys.exit(code)
@@ -177,7 +178,7 @@ EOF''')
         """
         设置系统网络：包括下载，自启动
         """
-        self.run_cmd_chroot("pacman -S dhcpcd networkmanager")
+        self.run_cmd("pacstrap /mnt dhcpcd networkmanager")
         self.run_cmd_chroot("systemctl enable dhcpcd")
         self.run_cmd_chroot("systemctl enable NetworkManager")
 
@@ -187,11 +188,11 @@ EOF''')
         设置grub引导
         """
         if self.boot == UEFI:
-            self.run_cmd_chroot("pacman -S grub efibootmgr")
+            self.run_cmd("pacstrap /mnt grub efibootmgr")
             self.run_cmd_chroot("grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=GRUB")
             self.run_cmd_chroot("grub-mkconfig -o /boot/grub/grub.cfg")
         elif self.boot == BIOS:
-            self.run_cmd_chroot("pacman -S grub")
+            self.run_cmd("pacstrap /mnt grub")
             self.run_cmd_chroot(f"grub-install {self.disk}")
             self.run_cmd_chroot("grub-mkconfig -o /boot/grub/grub.cfg")
 
@@ -200,9 +201,9 @@ EOF''')
         """
         设置普通用户
         """
-        self.run_cmd_chroot(f'echo -e "{self.password}\\n{self.password}\\n" | passwd')
+        self.run_cmd_chroot(f"sh -c \"echo 'root:{self.password}' | chpasswd\"")
         self.run_cmd_chroot(f"useradd -m -G wheel -s /bin/bash {self.username}")
-        self.run_cmd_chroot(f'echo -e "{self.password}\\n{self.password}\\n" | passwd {self.username}')
+        self.run_cmd_chroot(f"sh -c \"echo '{self.username}:{self.password}' | chpasswd\"")
         self.run_cmd_chroot("sed -in-place -e 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers")
 
     @just_run("设置桌面环境")
@@ -212,13 +213,13 @@ EOF''')
         """
         if self.desktop == NO_DESKTOP:
             return
-        self.run_cmd_chroot("pacman -S xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics")
-        self.run_cmd_chroot("pacman -S ttf-dejavu wqy-microhei git wget curl")
+        self.run_cmd("pacstrap /mnt xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics")
+        self.run_cmd("pacstrap /mnt ttf-dejavu wqy-microhei git wget curl")
         if self.desktop == GNOME:
-            self.run_cmd_chroot("pacman -S gdm gnome gnome-extra")
+            self.run_cmd("pacstrap /mnt gdm gnome gnome-extra")
             self.run_cmd_chroot("systemctl enable gdm")
         elif self.desktop == PLASMA:
-            self.run_cmd_chroot("pacman -S plasma kde-applications libdbusmenu-glib appmenu-gtk-module packagekit-qt5")
+            self.run_cmd("pacstrap /mnt plasma kde-applications libdbusmenu-glib appmenu-gtk-module packagekit-qt5")
             self.run_cmd_chroot("systemctl enable sddm")
 
     @just_run("进行收尾工作")
