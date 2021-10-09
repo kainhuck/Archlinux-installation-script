@@ -79,19 +79,19 @@ def find_disk():
             disks.append(each)
 
     if len(disks):
-        print("发现如下可用磁盘:")
+        print("\033[34m发现如下可用磁盘:\033[30m")
         for i in range(len(disks)):
-            print(f"{i} - {disks[i]}")
+            print(f"\033[35m{i} - {disks[i]}\033[30m")
     else:
         print("未发现可用磁盘，程序退出")
         sys.exit(0)
 
-    choose_index_str = input("请从上面选择一个要安装的磁盘(输入序号，默认0): ")
+    choose_index_str = input("\033[34m请从上面选择一个要安装的磁盘(输入序号，默认0): \033[30m")
     choose_index = 0
     if len(choose_index_str) != 0:
         choose_index = int(choose_index_str)
     while choose_index < 0 or choose_index >= len(disks):
-        choose_index = int(input("输入的序号有误，请重新输入: "))
+        choose_index = int(input("\033[31m输入的序号有误，请重新输入: \033[30m"))
 
     return disks[choose_index].split(":")[0]
 
@@ -284,47 +284,47 @@ def main():
     boot = check_boot()
 
     # 选择桌面
-    desktop = int(input("脚本支持以下桌面环境:\n0. 无桌面\n1. gnome\n2. plasma\n请选择桌面环境: "))
+    desktop = int(input("\033[32m脚本支持以下桌面环境:\033[30m\n\033[35m0. 无桌面\n1. gnome\n2. plasma\n\033[32m请选择桌面环境: \033[30m"))
     while desktop not in (0, 1, 2):
-        desktop = int(input("输入有误请重新输入"))
+        desktop = int(input("\033[31m输入有误请重新输入: \033[30m"))
 
     # 选择磁盘
     disk = find_disk()
 
     # 选择swap
-    swap_mem = int(input("请输入swap分区的内存大小(单位G): "))
+    swap_mem = int(input("\033[36m请输入swap分区的内存大小(单位G): \033[30m"))
     while swap_mem < 1:
-        swap_mem = int(input("输入不合法，请重新输入: "))
+        swap_mem = int(input("\033[31m输入不合法，请重新输入: \033[30m"))
 
     # hostname
-    host = input("请输入hostname: ")
+    host = input("\033[33m请输入hostname: \033[30m")
 
     # username & password
-    username = input("请输入新用户名: ")
+    username = input("\033[33m请输入新用户名: \033[30m")
     while username == "root":
-        username = input("用户名有误请重新输入: ")
-    passwd = input("请为管理员用户设置密码: ")
+        username = input("\033[31m用户名有误请重新输入: \033[30m")
+    passwd = input("\033[33m请为管理员用户设置密码: \033[30m")
 
     # ucode
     ucode = ""
-    code = int(input("脚本支持以下cpu:\n0. intel\n1. amd\n2. 其他\n请选择你的cpu类型: "))
+    code = int(input("\033[32m脚本支持以下cpu:\n\033[35m0. intel\n1. amd\n2. 其他\n\033[32m请选择你的cpu类型: \033[30m"))
     while code not in (0, 1, 2):
-        code = int(input("输入有误请重新输入: "))
+        code = int(input("\033[31m输入有误请重新输入: \033[30m"))
     if code == 0:
         ucode = "intel-ucode"
     elif code == 1:
         ucode = "amd-ucode"
 
-    print("=============信息确认=============")
-    print(f"= 引导方式:", ("BIOS", "UEFI")[boot])
-    print("= 桌面环境:", ("无桌面", "Gnome", "Plasma")[desktop])
-    print("= 安装磁盘:", disk)
-    print(f"= swap大小: {swap_mem}G")
-    print("= hostname:", host)
-    print("= cpu类型:", ("intel", "amd", "other")[code])
-    print("= 用户名:", username)
-    print("= 密码(root用户也会设置为该密码):", passwd)
-    print("===============================")
+    print("\033[33m=============信息确认=============\033[30m")
+    print(f"\033[33m= \033[36m引导方式: {('BIOS', 'UEFI')[boot]}\033[30m")
+    print(f"\033[33m= \033[36m桌面环境: {('无桌面', 'Gnome', 'Plasma')[desktop]}\033[30m")
+    print(f"\033[33m= \033[36m安装磁盘: {disk}\033[30m")
+    print(f"\033[33m= \033[36mswap大小: {swap_mem}G\033[30m")
+    print(f"\033[33m= \033[36mhostname: {host}\033[30m")
+    print(f"\033[33m= \033[36mcpu类型: {('intel', 'amd', 'other')[code]}\033[30m")
+    print(f"\033[33m= \033[36m用户名: {username}\033[30m")
+    print(f"\033[33m= \033[36m密码(root用户也会设置为该密码): {passwd}\033[30m")
+    print("\033[33m===============================\033[30m")
     yn = input("确认信息无误(Y/n): ")
     if yn.lower() == "n":
         print("未开始安装, 安装退出")
