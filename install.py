@@ -275,7 +275,10 @@ def main():
         print("未发现可用磁盘，程序退出")
         sys.exit(0)
 
-    choose_index = int(input("请从上面选择一个要安装的磁盘(输入序号): "))
+    choose_index_str = input("请从上面选择一个要安装的磁盘(输入序号，默认0): ")
+    choose_index = 0
+    if len(choose_index_str) != 0:
+        choose_index = int(choose_index_str)
     while choose_index < 0 or choose_index >= len(disks):
         choose_index = int(input("输入的序号有误，请重新输入: "))
 
