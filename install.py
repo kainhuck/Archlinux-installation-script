@@ -18,9 +18,9 @@ PLASMA = 2
 def just_run(prompt: str):
     def decorator(func):
         def wrapper(*args, **kwargs):
-            print(f"正在{prompt}...")
+            print(f"\033[34m正在{prompt}...\033[0m")
             func(*args, **kwargs)
-            print("OK")
+            print("\033[32mOK\033[0m")
 
         return wrapper
 
@@ -112,7 +112,7 @@ class Installation:
         """
         运行命令
         """
-        print(f"RUN >>> {cmd}")
+        print(f"\036[33mRUN\036[30m >>> \036[36m{cmd}\036[0m")
         code = os.system(cmd)
         if code != 0:
             sys.exit(code)
