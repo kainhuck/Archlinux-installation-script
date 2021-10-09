@@ -74,11 +74,16 @@ class Installation:
         self.ucode = ucode
 
     @staticmethod
-    def run_cmd(cmd:str):
+    def run_cmd(cmd: str):
         """
         运行命令 todo
         """
-        print(cmd)
+        code, output = subprocess.getstatusoutput(cmd)
+        try:
+            assert code == 0
+        except AssertionError as e:
+            print(f"ERROR {output}")
+            sys.exit(code)
 
     @just_run("更新系统时间")
     def update_datetime(self):
