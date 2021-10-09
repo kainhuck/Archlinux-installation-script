@@ -16,13 +16,15 @@ GNOME = 1
 PLASMA = 2
 
 
-def just_run(prompt:str):
+def just_run(prompt: str):
     def decorator(func):
         def wrapper(*args, **kwargs):
             print(f"正在{prompt}...")
             func(*args, **kwargs)
             print("OK")
+
         return wrapper
+
     return decorator
 
 
@@ -78,11 +80,8 @@ class Installation:
         """
         运行命令 todo
         """
-        code, output = subprocess.getstatusoutput(cmd)
-        try:
-            assert code == 0
-        except AssertionError as e:
-            print(f"ERROR {output}")
+        code = os.system(cmd)
+        if code != 0:
             sys.exit(code)
 
     @just_run("更新系统时间")
@@ -104,12 +103,12 @@ class Installation:
                               "n", "", "", "",  # 根分区
                               "w"  # 写入
                               )
-        self.run_cmd(f"{part} {self.disk}")
+        run_cmd(part, self.disk)
         if self.boot == UEFI:
             # 格式化
-            self.run_cmd(f"mkfs.vfat {self.disk}1")
-            self.run_cmd(f"mkswap {self.disk}2")
-            self.run_cmd(f"mkfs.ext4 {self.disk}3")
+            run_cmd(f"mkfs.vfat {self.disk}1")
+            run_cmd(f"mkswap {self.disk}2")
+            run_cmd(f"mkfs.ext4 {self.disk}3")
             # 挂载
             self.run_cmd(f"mount {self.disk}3 /mnt")
             self.run_cmd("mkdir -p /mnt/boot/EFI")
@@ -117,9 +116,9 @@ class Installation:
             self.run_cmd(f"swapon {self.disk}2")
         elif self.boot == BIOS:
             # 格式化
-            self.run_cmd(f"mkfs.ext2 {self.disk}1")
-            self.run_cmd(f"mkswap {self.disk}2")
-            self.run_cmd(f"mkfs.ext4 {self.disk}3")
+            run_cmd(f"mkfs.ext2 {self.disk}1")
+            run_cmd(f"mkswap {self.disk}2")
+            run_cmd(f"mkfs.ext4 {self.disk}3")
             # 挂载
             self.run_cmd(f"mount {self.disk}3 /mnt")
             self.run_cmd("mkdir -p /mnt/boot")
@@ -298,7 +297,6 @@ def main():
     while username == "root":
         username = input("用户名有误请重新输入: ")
     passwd = input("请为管理员用户设置密码: ")
-
 
     # ucode
     ucode = ""
