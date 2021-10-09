@@ -246,7 +246,12 @@ def main():
     print("OK")
 
     # 确定引导方式
+    print("正在检查引导方式...")
     boot = check_boot()
+    if boot:
+        print("当前是 UEFI 引导")
+    else:
+        print("当前是 BIOS 引导")
     # 选择桌面
     desktop = int(input("脚本支持以下桌面环境:\n0. 无桌面\n1. gnome\n2. plasma\n请选择桌面环境: "))
     while desktop not in (0, 1, 2):
@@ -299,6 +304,21 @@ def main():
         ucode = "intel-ucode"
     elif code == 1:
         ucode = "amd-ucode"
+
+    print("=============信息确认=============")
+    print(f"= 引导方式:", ("BIOS", "UEFI")[boot])
+    print("= 桌面环境:", ("无桌面", "Gnome", "Plasma")[desktop])
+    print("= 安装磁盘:", disk)
+    print(f"= swap大小: {swap_mem}G")
+    print("= hostname:", host)
+    print("= cpu类型:", ("intel", "amd", "other")[code])
+    print("= 用户名:", username)
+    print("= 密码(root用户也会设置为该密码):", passwd)
+    print("===============================")
+    yn = input("确认信息无误(Y/n): ")
+    if yn.lower() == "n":
+        print("未开始安装, 安装退出")
+        exit(0)
 
     installation = Installation(boot, desktop, disk, swap_mem, host, username, passwd, ucode)
 
