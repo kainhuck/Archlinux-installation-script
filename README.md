@@ -1,5 +1,7 @@
 # Archlinux-installation-script
 
+![GitHub](https://img.shields.io/github/license/kainhuck/Archlinux-installation-script?style=for-the-badge) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/kainhuck/Archlinux-installation-script?style=for-the-badge)
+
 ## install.py
 
 archlinux的安装脚本，可选择`Gnome`或者`plasma`桌面（推荐选择 plasma 桌面）
