@@ -273,6 +273,8 @@ def main():
     while choose_index < 0 or choose_index >= len(disks):
         choose_index = int(input("输入的序号有误，请重新输入: "))
 
+    disk = disks[choose_index].split(":")[0]
+
     # 选择swap
     swap_mem = int(input("请输入swap分区的内存大小(单位G): "))
     while swap_mem < 1:
@@ -298,7 +300,7 @@ def main():
     elif code == 1:
         ucode = "amd-ucode"
 
-    installation = Installation(boot, desktop, disks[choose_index], swap_mem, host, username, passwd, ucode)
+    installation = Installation(boot, desktop, disk, swap_mem, host, username, passwd, ucode)
 
     # ======================= 下面是正式安装过程 ======================= #
     installation.update_datetime()
