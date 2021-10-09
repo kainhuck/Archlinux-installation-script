@@ -112,7 +112,7 @@ class Installation:
         """
         运行命令
         """
-        print(f"\036[33mRUN\036[30m >>> \036[36m{cmd}\036[0m")
+        print(f"\033[33mRUN\033[30m >>> \033[36m{cmd}\033[0m")
         code = os.system(cmd)
         if code != 0:
             sys.exit(code)
