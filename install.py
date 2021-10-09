@@ -27,8 +27,11 @@ def just_run(prompt: str):
     return decorator
 
 
+@just_run("检查平台")
 def check_platform():
-    return platform.uname()[0] == "Linux" and platform.uname()[1] == "archiso"
+    if not platform.uname()[0] == "Linux" and platform.uname()[1] == "archiso":
+         print("This script only for archlinux installation")
+         sys.exit(0)
 
 
 def check_boot():
@@ -37,9 +40,12 @@ def check_boot():
     return BIOS
 
 
+@just_run("检查网络")
 def check_network():
     code, _ = subprocess.getstatusoutput("ping -c 3 www.baidu.com")
-    return code == 0
+    if not code == 0:
+        print("Please connect Internet")
+        sys.exit(0)
 
 
 def run_cmd(*cmd):
@@ -60,6 +66,34 @@ def disk_partition(*ops):
     for p in ops:
         args.append(f"{p}\\n")
     return cmd_format.format(args="".join(args))
+
+
+def find_disk():
+    output = run_cmd("fdisk", "-l")
+    disks_ = re.findall("(/dev/.+?: [0-9 .]+? .+?iB)", output)
+    disks = []
+    for each in disks_:
+        if "rom" in each or "loop" in each or "airoot" in each:
+            continue
+        else:
+            disks.append(each)
+
+    if len(disks):
+        print("发现如下可用磁盘:")
+        for i in range(len(disks)):
+            print(f"{i} - {disks[i]}")
+    else:
+        print("未发现可用磁盘，程序退出")
+        sys.exit(0)
+
+    choose_index_str = input("请从上面选择一个要安装的磁盘(输入序号，默认0): ")
+    choose_index = 0
+    if len(choose_index_str) != 0:
+        choose_index = int(choose_index_str)
+    while choose_index < 0 or choose_index >= len(disks):
+        choose_index = int(input("输入的序号有误，请重新输入: "))
+
+    return disks[choose_index].split(":")[0]
 
 
 class Installation:
@@ -241,56 +275,21 @@ EOF''')
 def main():
     # ======================= 检查安装环境 ======================= #
     # 检查平台
-    print("正在检查安装平台信息...")
-    if not check_platform():
-        print("This script only for archlinux installation")
-        sys.exit(0)
-    print("OK")
+    check_platform()
 
-    print("正在检查网络连接...")
     # 检查网络
-    if not check_network():
-        print("Please connect Internet")
-        sys.exit(0)
-    print("OK")
+    check_network()
 
     # 确定引导方式
-    print("正在检查引导方式...")
     boot = check_boot()
-    if boot:
-        print("当前是 UEFI 引导")
-    else:
-        print("当前是 BIOS 引导")
+
     # 选择桌面
     desktop = int(input("脚本支持以下桌面环境:\n0. 无桌面\n1. gnome\n2. plasma\n请选择桌面环境: "))
     while desktop not in (0, 1, 2):
         desktop = int(input("输入有误请重新输入"))
+
     # 选择磁盘
-    output = run_cmd("fdisk", "-l")
-    disks_ = re.findall("(/dev/.+?: [0-9 .]+? .+?iB)", output)
-    disks = []
-    for each in disks_:
-        if "rom" in each or "loop" in each or "airoot" in each:
-            continue
-        else:
-            disks.append(each)
-
-    if len(disks):
-        print("发现如下可用磁盘:")
-        for i in range(len(disks)):
-            print(f"{i} - {disks[i]}")
-    else:
-        print("未发现可用磁盘，程序退出")
-        sys.exit(0)
-
-    choose_index_str = input("请从上面选择一个要安装的磁盘(输入序号，默认0): ")
-    choose_index = 0
-    if len(choose_index_str) != 0:
-        choose_index = int(choose_index_str)
-    while choose_index < 0 or choose_index >= len(disks):
-        choose_index = int(input("输入的序号有误，请重新输入: "))
-
-    disk = disks[choose_index].split(":")[0]
+    disk = find_disk()
 
     # 选择swap
     swap_mem = int(input("请输入swap分区的内存大小(单位G): "))
