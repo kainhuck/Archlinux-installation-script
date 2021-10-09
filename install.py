@@ -64,7 +64,6 @@ def disk_partition(*ops):
 
 class Installation:
     def __init__(self, boot, desktop, disk, swap, hostname, username, password, ucode):
-        self.name = "base"
         self.boot = boot
         self.desktop = desktop
         self.disk = disk
