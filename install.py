@@ -101,15 +101,15 @@ class Installation:
         """
         磁盘分区: 包含分区，格式化，挂载，三步骤 todo
         """
-        part = disk_partition("d", "", "d", "", "d", "", "d", "", "d", "", "d", "", "d", "",  # 删除现有分区
+        if self.boot == UEFI:
+            part = disk_partition("d", "", "d", "", "d", "", "d", "", "d", "", "d", "", "d", "",  # 删除现有分区
                               "g",  # 新建gpt分区表
                               "n", "", "", "+512M",  # 新建EFI分区/boot分区
                               "n", "", "", f"+{self.swap}G",  # swap分区
                               "n", "", "", "",  # 根分区
                               "w"  # 写入
                               )
-        run_cmd(part, self.disk)
-        if self.boot == UEFI:
+            run_cmd(part, self.disk)
             # 格式化
             run_cmd(f"mkfs.vfat {self.disk}1")
             run_cmd(f"mkswap {self.disk}2")
@@ -120,6 +120,14 @@ class Installation:
             self.run_cmd(f"mount {self.disk}1 /mnt/boot/EFI")
             self.run_cmd(f"swapon {self.disk}2")
         elif self.boot == BIOS:
+            part = disk_partition("d", "", "d", "", "d", "", "d", "", "d", "", "d", "", "d", "",  # 删除现有分区
+                              "o",  # 新建mbr分区表
+                              "n", "", "", "+512M",  # 新建EFI分区/boot分区
+                              "n", "", "", f"+{self.swap}G",  # swap分区
+                              "n", "", "", "",  # 根分区
+                              "w"  # 写入
+                              )
+            run_cmd(part, self.disk)
             # 格式化
             run_cmd(f"mkfs.ext2 {self.disk}1")
             run_cmd(f"mkswap {self.disk}2")
