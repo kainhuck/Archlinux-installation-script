@@ -177,7 +177,7 @@ class Installation:
         """
         下载linux基础软件包
         """
-        self.run_cmd(f"pacstrap /mnt base base-devel linux linux-firmware vim openssh {self.ucode}")
+        self.run_cmd(f"pacstrap /mnt base base-devel linux linux-firmware vim openssh zsh {self.ucode}")
 
     @just_run("生成fstab文件")
     def gen_fstab(self):
@@ -244,7 +244,7 @@ EOF''')
         设置普通用户
         """
         self.run_cmd_chroot(f"sh -c \"echo 'root:{self.password}' | chpasswd\"")
-        self.run_cmd_chroot(f"useradd -m -G wheel -s /bin/bash {self.username}")
+        self.run_cmd_chroot(f"useradd -m -G wheel -s /bin/zsh {self.username}")
         self.run_cmd_chroot(f"sh -c \"echo '{self.username}:{self.password}' | chpasswd\"")
         self.run_cmd_chroot("sed -in-place -e 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers")
 
