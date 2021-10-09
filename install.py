@@ -122,9 +122,9 @@ class Installation:
         elif self.boot == BIOS:
             part = disk_partition("d", "", "d", "", "d", "", "d", "", "d", "", "d", "", "d", "",  # 删除现有分区
                               "o",  # 新建mbr分区表
-                              "n", "", "", "+512M",  # 新建EFI分区/boot分区
-                              "n", "", "", f"+{self.swap}G",  # swap分区
-                              "n", "", "", "",  # 根分区
+                              "n", "", "", "", "+512M", "Y",  # 新建EFI分区/boot分区
+                              "n", "", "", "", f"+{self.swap}G", "Y",  # swap分区
+                              "n", "", "", "", "", "Y",  # 根分区
                               "w"  # 写入
                               )
             run_cmd(part, self.disk)
