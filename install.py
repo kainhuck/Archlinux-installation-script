@@ -6,7 +6,6 @@ import re
 import sys
 import subprocess
 import platform
-import time
 
 UEFI = True
 BIOS = False
