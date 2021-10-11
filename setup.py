@@ -18,6 +18,7 @@ def just_run(prompt: str):
 
 
 def run_cmd(cmd: str):
+    print(f"RUN >> {cmd}")
     code = os.system(cmd)
     if code != 0:
         sys.exit(code)
@@ -26,8 +27,9 @@ def run_cmd(cmd: str):
 class BaseConfig:
     @just_run("配置archlinuxcn源")
     def set_archlinuxcn(self):
-        run_cmd('sudo echo -e "\\n[archlinuxcn]\\nServer = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch" >> /etc/pacman.conf')
-        run_cmd("sudo pacman -Syu archlinuxcn-keyring")
+        run_cmd("sudo sh -c 'cat >> /etc/pacman.conf <<EOF\n[archlinuxcn]\nServer = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/\$arch\nEOF'")
+        run_cmd("sudo pacman -Syu")
+        run_cmd("sudo pacman -S archlinuxcn-keyring")
     
     @just_run("设置AUR")
     def set_aur(self):
@@ -49,6 +51,10 @@ class BaseConfig:
         run_cmd("echo -e 'export XIM=fcitx\\nexport XIM_PROGRAM=fcitx\\nexport GTK_IM_MODULE=fcitx\\nexport QT_IM_MODULE=fcitx\\nexport XMODIFIERS\"@im=fcitx\"\\n' >> ~/.xprofile")
         run_cmd("source ~/.xprofile")
 
+    @just_run("安装nerd-font字体")
+    def set_font(self):
+        run_cmd("sudo pacman -S nerd-fonts-complete")
+
 # 2. 各类开发环境
 class Develop:
     @just_run("安装golang")
@@ -69,11 +75,7 @@ class Develop:
         run_cmd('sudo gpasswd -a ${USER} docker')
         run_cmd("sudo mkdir /etc/docker")
         run_cmd("sudo touch /etc/docker/daemon.json")
-        run_cmd('''sudo tee /etc/docker/daemon.json <<-'EOF'
-{
-	"registry-mirrors": ["http://hub-mirror.c.163.com"]
-}
-EOF''')
+        run_cmd('''sudo tee /etc/docker/daemon.json <<-'EOF'\n{\n	"registry-mirrors": ["http://hub-mirror.c.163.com"]\n}\nEOF''')
         run_cmd("sudo systemctl restart docker")
         run_cmd("sudo systemctl enable docker")
 
@@ -124,6 +126,7 @@ def main():
     base.set_aur()
     base.set_oh_my_zsh()
     base.set_fcitx()
+    base.set_font()
     
     dev = Develop()
     dev.set_golang()

@@ -210,10 +210,7 @@ class Installation:
         设置系统host
         """
         self.run_cmd_chroot(f'echo "{self.hostname}" > /etc/hostname')
-        self.run_cmd_chroot('''tee /etc/hosts <<-'EOF'
-127.0.0.1	localhost
-::1		localhost
-EOF''')
+        self.run_cmd_chroot('''tee /etc/hosts <<-'EOF'\n127.0.0.1	localhost\n::1		localhost\nEOF''')
 
     @just_run("设置网络")
     def set_network(self):
