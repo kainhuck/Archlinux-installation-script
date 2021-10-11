@@ -269,6 +269,7 @@ EOF''')
         """
         收尾工作
         """
+        self.run_cmd_chroot("systemctl enable sshd")
         self.run_cmd("umount -R /mnt")
 
 

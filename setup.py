@@ -26,7 +26,7 @@ def run_cmd(cmd: str):
 class BaseConfig:
     @just_run("配置archlinuxcn源")
     def set_archlinuxcn(self):
-        run_cmd('sudo echo -e "\\n[archlinuxcn]\\nServer = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/\$arch" >> /etc/pacman.conf')
+        run_cmd('sudo echo -e "\\n[archlinuxcn]\\nServer = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/$arch" >> /etc/pacman.conf')
         run_cmd("sudo pacman -Syu archlinuxcn-keyring")
     
     @just_run("设置AUR")
@@ -46,20 +46,50 @@ class BaseConfig:
     def set_fcitx(self):
         run_cmd("sudo pacman -S fcitx-im fcitx-table-other kcm-fcitx fcitx-skin-material") # kcm 针对kde桌面
         run_cmd("touch ~/.xprofile")
-        run_cmd("echo -e 'export XIM=fcitx\\nexport XIM_PROGRAM=fcitx\\nexport GTK_IM_MODULE=fcitx\\nexport QT_IM_MODULE=fcitx\\nexport XMODIFIERS\"@im=fcitx\"' >> ~/.xprofile")
+        run_cmd("echo -e 'export XIM=fcitx\\nexport XIM_PROGRAM=fcitx\\nexport GTK_IM_MODULE=fcitx\\nexport QT_IM_MODULE=fcitx\\nexport XMODIFIERS\"@im=fcitx\"\\n' >> ~/.xprofile")
         run_cmd("source ~/.xprofile")
-# 2. 各类开发环境
-##  golang
-##  docker
 
-# 3. 其他软件
-##  virtualbox
+# 2. 各类开发环境
+class Develop:
+    @just_run("安装golang")
+    def set_golang(self):
+        run_cmd('sudo pacman -S go')
+        run_cmd('mkdir ~/.go')
+        run_cmd('mkdir ~/.go/bin')
+        run_cmd('mkdir ~/.go/src')
+        run_cmd('mkdir ~/.go/pkg')
+        run_cmd('echo -e "export GOROOT=/usr/lib/go\\nexport GOPATH=~/Documents/go\\nexport GOBIN=~/Documents/go/bin\\nexport PATH=$PATH:$GOROOT/bin:$GOBIN\\n" >> ~/.xprofile')
+        run_cmd('source ~/.xprofile')
+        run_cmd('go env -w GOPROXY=https://goproxy.io,direct')
+    
+    @just_run("安装docker")
+    def set_docker(self):
+        run_cmd('sudo pacman -S docker')
+        run_cmd('sudo gpasswd -a ${USER} docker')
+        run_cmd("sudo mkdir /etc/docker")
+        run_cmd("sudo touch /etc/docker/daemon.json")
+        run_cmd('''sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+	"registry-mirrors": ["http://hub-mirror.c.163.com"]
+}
+EOF''')
+        run_cmd("sudo systemctl restart docker")
+        run_cmd("sudo systemctl enable docker")
+
+# 3. 常用软件
+## virtualbox
+## only office
+## telegram
+## google-chrome-stable
+## qqmusic
+## typora
+## vscode-bin
 
 # 4. 美化
-##  grub主题
-##  图标主题
-##  全局主题
-##  kde插件
+## grub主题
+## 图标主题
+## 全局主题
+## kde插件
 
 def main():
     base = BaseConfig()
