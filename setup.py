@@ -61,6 +61,7 @@ class Develop:
         run_cmd('echo -e "export GOROOT=/usr/lib/go\\nexport GOPATH=~/Documents/go\\nexport GOBIN=~/Documents/go/bin\\nexport PATH=$PATH:$GOROOT/bin:$GOBIN\\n" >> ~/.xprofile')
         run_cmd('source ~/.xprofile')
         run_cmd('go env -w GOPROXY=https://goproxy.io,direct')
+        run_cmd('sudo pacman -S goland-jre goland')
     
     @just_run("安装docker")
     def set_docker(self):
@@ -77,19 +78,45 @@ EOF''')
         run_cmd("sudo systemctl enable docker")
 
 # 3. 常用软件
-## virtualbox
-## only office
-## telegram
-## google-chrome-stable
-## qqmusic
-## typora
-## vscode-bin
+class Software:
+    @just_run("安装virtualbox")
+    def set_virtualbox(self):
+        run_cmd('sudo pacman -S virtualbox virtualbox-ext-oracle virtualbox-guest-iso net-tools')
+
+    @just_run("安装telegram")
+    def set_telegram(self):
+        run_cmd('sudo pacman -S telegram-desktop')
+    
+    @just_run("安装google-chrome")
+    def set_chrome(self):
+        run_cmd('yay -S google-chrome')
+    
+    @just_run("安装typora")
+    def set_typora(self):
+        run_cmd("sudo pacman -S typora")
+    
+    @just_run("安装vscode")
+    def set_vscode(self):
+        run_cmd("yay -S visual-studio-code-bin")
+    
+    @just_run("安装qq音乐")
+    def set_qqmusic(self):
+        run_cmd("yay -S qqmusic-bin")
+    
 
 # 4. 美化
-## grub主题
-## 图标主题
-## 全局主题
-## kde插件
+class Beauty:
+    @just_run("安装papirus图标主题")
+    def set_icon_theme(self):
+        run_cmd("sudo pacman -S papirus-icon-theme")
+    
+    @just_run("安装layan全局主题")
+    def set_layan_theme(self):
+        run_cmd("yay -S layan-kde-git")
+    
+    @just_run("安装tela-2k grub主题")
+    def set_grub_theme(self):
+        run_cmd("yay -S grub-theme-tela-color-2k-git")
 
 def main():
     base = BaseConfig()
@@ -97,6 +124,23 @@ def main():
     base.set_aur()
     base.set_oh_my_zsh()
     base.set_fcitx()
+    
+    dev = Develop()
+    dev.set_golang()
+    dev.set_docker()
+
+    soft = Software()
+    soft.set_chrome()
+    soft.set_typora()
+    # soft.set_virtualbox()
+    soft.set_telegram()
+    soft.set_vscode()
+    soft.set_qqmusic()
+
+    b = Beauty()
+    b.set_grub_theme()
+    b.set_icon_theme()
+    b.set_layan_theme()
 
 if __name__ == "__main__":
     main()

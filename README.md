@@ -9,6 +9,8 @@ archlinux的安装脚本，可选择`Gnome`或者`plasma`桌面（推荐选择 p
 
 **使用**
 
+安装脚本
+
 ```shell
 curl -LJO https://github.com/kainhuck/Archlinux-installation-script/releases/download/v1.0/install.py
 
@@ -17,9 +19,12 @@ chmod +x install.py
 ./install.py
 ```
 
-## todo
+安装后的配置脚本(针对kde桌面, 其他桌面按需修改)
 
-1. setup.py  安装后的配置
-2. 新建用户默认shell改为zsh
-3. 增加核显开源驱动的安装
-4. 确定设备分区数目
+```shell
+curl -LJO https://github.com/kainhuck/Archlinux-installation-script/releases/download/v2.0/setup.py
+
+chmod +x install.py
+
+./install.py
+```
