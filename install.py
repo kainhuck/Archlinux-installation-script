@@ -177,7 +177,7 @@ class Installation:
         """
         下载linux基础软件包
         """
-        self.run_cmd(f"pacstrap /mnt base base-devel linux linux-firmware vim openssh zsh {self.ucode}")
+        self.run_cmd(f"pacstrap /mnt base base-devel linux linux-firmware vim openssh zsh git wget curl {self.ucode}")
 
     @just_run("生成fstab文件")
     def gen_fstab(self):
@@ -256,7 +256,7 @@ EOF''')
         if self.desktop == NO_DESKTOP:
             return
         self.run_cmd("pacstrap /mnt xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics")
-        self.run_cmd("pacstrap /mnt ttf-dejavu wqy-microhei git wget curl")
+        self.run_cmd("pacstrap /mnt ttf-dejavu wqy-microhei")
         if self.desktop == GNOME:
             self.run_cmd("pacstrap /mnt gdm gnome gnome-extra")
             self.run_cmd_chroot("systemctl enable gdm")
