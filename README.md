@@ -10,7 +10,7 @@ archlinux的安装脚本，可选择`Gnome`或者`plasma`桌面（推荐选择 p
 **使用**
 
 ```shell
-wget https://github.com/kainhuck/Archlinux-installation-script/releases/download/v1.0/install.py
+curl -LJO https://github.com/kainhuck/Archlinux-installation-script/releases/download/v1.0/install.py
 
 chmod +x install.py
 
