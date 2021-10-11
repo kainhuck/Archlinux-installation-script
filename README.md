@@ -21,6 +21,8 @@ chmod +x install.py
 
 安装后的配置脚本(针对kde桌面, 其他桌面按需修改)
 
+安装好ohmyzsh需输入exit推出ohmyzsh以进行下一步操作
+
 ```shell
 curl -LJO https://github.com/kainhuck/Archlinux-installation-script/releases/download/v2.0/setup.py
 

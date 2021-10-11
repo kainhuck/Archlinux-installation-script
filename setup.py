@@ -42,13 +42,13 @@ class BaseConfig:
         run_cmd('git clone git://github.com/zsh-users/zsh-autosuggestions.git ~/.oh-my-zsh/plugins/zsh-autosuggestions')
         run_cmd('git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/plugins/zsh-syntax-highlighting')
         run_cmd("sed -in-place -e 's/plugins=(git)/plugins=(docker git sudo zsh-syntax-highlighting zsh-autosuggestions)/g' ~/.zshrc")
-        run_cmd("source ~/.zshrc")
+        run_cmd("zsh -c 'source ~/.zshrc'")
     
     @just_run("安装输入法")
     def set_fcitx(self):
-        run_cmd("sudo pacman -S fcitx-im fcitx-table-other kcm-fcitx fcitx-skin-material") # kcm 针对kde桌面
+        run_cmd("sudo pacman -S fcitx fcitx-table-other kcm-fcitx fcitx-skin-material") # kcm 针对kde桌面
         run_cmd("touch ~/.xprofile")
-        run_cmd("echo -e 'export XIM=fcitx\\nexport XIM_PROGRAM=fcitx\\nexport GTK_IM_MODULE=fcitx\\nexport QT_IM_MODULE=fcitx\\nexport XMODIFIERS\"@im=fcitx\"\\n' >> ~/.xprofile")
+        run_cmd("echo -e 'export XIM=fcitx\\nexport XIM_PROGRAM=fcitx\\nexport GTK_IM_MODULE=fcitx\\nexport QT_IM_MODULE=fcitx\\nexport XMODIFIERS=\"@im=fcitx\"\\n' >> ~/.xprofile")
         run_cmd("source ~/.xprofile")
 
     @just_run("安装nerd-font字体")
@@ -76,7 +76,6 @@ class Develop:
         run_cmd("sudo mkdir /etc/docker")
         run_cmd("sudo touch /etc/docker/daemon.json")
         run_cmd('''sudo tee /etc/docker/daemon.json <<-'EOF'\n{\n	"registry-mirrors": ["http://hub-mirror.c.163.com"]\n}\nEOF''')
-        run_cmd("sudo systemctl restart docker")
         run_cmd("sudo systemctl enable docker")
 
 # 3. 常用软件
