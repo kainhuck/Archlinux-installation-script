@@ -35,14 +35,6 @@ class BaseConfig:
     def set_aur(self):
         run_cmd("sudo pacman -S yay")
         run_cmd('yay --aururl "https://aur.tuna.tsinghua.edu.cn" --save')
-
-    @just_run("设置ohmyzsh")
-    def set_oh_my_zsh(self):
-        run_cmd('sh -c "$(wget https://gitee.com/shenghaiyang/ohmyzsh/raw/master/tools/install.sh -O -)"')
-        run_cmd('git clone git://github.com/zsh-users/zsh-autosuggestions.git ~/.oh-my-zsh/plugins/zsh-autosuggestions')
-        run_cmd('git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/plugins/zsh-syntax-highlighting')
-        run_cmd("sed -in-place -e 's/plugins=(git)/plugins=(docker git sudo zsh-syntax-highlighting zsh-autosuggestions)/g' ~/.zshrc")
-        run_cmd("zsh -c 'source ~/.zshrc'")
     
     @just_run("安装输入法")
     def set_fcitx(self):
@@ -54,6 +46,19 @@ class BaseConfig:
     @just_run("安装nerd-font字体")
     def set_font(self):
         run_cmd("sudo pacman -S nerd-fonts-complete")
+
+    @just_run("设置ohmyzsh")
+    def set_oh_my_zsh(self):
+        run_cmd('sh -c "$(wget https://gitee.com/shenghaiyang/ohmyzsh/raw/master/tools/install.sh -O -)"')
+        run_cmd('git clone git://github.com/zsh-users/zsh-autosuggestions.git ~/.oh-my-zsh/plugins/zsh-autosuggestions')
+        run_cmd('git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/plugins/zsh-syntax-highlighting')
+        run_cmd("sed -in-place -e 's/plugins=(git)/plugins=(docker git sudo zsh-syntax-highlighting zsh-autosuggestions)/g' ~/.zshrc")
+        run_cmd("zsh -c 'source ~/.zshrc'")
+
+    @just_run("修改中文目录为英文")
+    def set_user_dir(self):
+        # todo
+        pass
 
 # 2. 各类开发环境
 class Develop:
@@ -123,9 +128,9 @@ def main():
     base = BaseConfig()
     base.set_archlinuxcn()
     base.set_aur()
-    base.set_oh_my_zsh()
     base.set_fcitx()
     base.set_font()
+    base.set_user_dir()
     
     dev = Develop()
     dev.set_golang()
@@ -143,6 +148,9 @@ def main():
     b.set_grub_theme()
     b.set_icon_theme()
     b.set_layan_theme()
+
+    # 最后再来安装oh-my-zsh
+    base.set_oh_my_zsh()
 
 if __name__ == "__main__":
     main()

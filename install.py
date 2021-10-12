@@ -254,6 +254,7 @@ class Installation:
             return
         self.run_cmd("pacstrap /mnt xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics")
         self.run_cmd("pacstrap /mnt ttf-dejavu wqy-microhei")
+        self.run_cmd_chroot(f"sh -c \"echo 'LANG=zh_CN.UTF-8' > /etc/locale.conf\"")
         if self.desktop == GNOME:
             self.run_cmd("pacstrap /mnt gdm gnome gnome-extra")
             self.run_cmd_chroot("systemctl enable gdm")
