@@ -29,7 +29,7 @@ class BaseConfig:
     def set_archlinuxcn(self):
         run_cmd("sudo sh -c 'cat >> /etc/pacman.conf <<EOF\n[archlinuxcn]\nServer = https://mirrors.tuna.tsinghua.edu.cn/archlinuxcn/\$arch\nEOF'")
         run_cmd("sudo pacman -Syu")
-        run_cmd("sudo pacman -S archlinuxcn-keyring")
+        run_cmd("sudo pacman -S --noconfirm archlinuxcn-keyring")
     
     @just_run("设置AUR")
     def set_aur(self):
@@ -46,20 +46,20 @@ class BaseConfig:
     
     @just_run("安装输入法")
     def set_fcitx(self):
-        run_cmd("sudo pacman -S fcitx fcitx-table-other kcm-fcitx fcitx-skin-material") # kcm 针对kde桌面
+        run_cmd("sudo pacman -S --noconfirm fcitx fcitx-table-other kcm-fcitx fcitx-skin-material") # kcm 针对kde桌面
         run_cmd("touch ~/.xprofile")
         run_cmd("echo -e 'export XIM=fcitx\\nexport XIM_PROGRAM=fcitx\\nexport GTK_IM_MODULE=fcitx\\nexport QT_IM_MODULE=fcitx\\nexport XMODIFIERS=\"@im=fcitx\"\\n' >> ~/.xprofile")
         run_cmd("source ~/.xprofile")
 
     @just_run("安装nerd-font字体")
     def set_font(self):
-        run_cmd("sudo pacman -S nerd-fonts-complete")
+        run_cmd("sudo pacman -S --noconfirm nerd-fonts-complete")
 
 # 2. 各类开发环境
 class Develop:
     @just_run("安装golang")
     def set_golang(self):
-        run_cmd('sudo pacman -S go')
+        run_cmd('sudo pacman -S --noconfirm go')
         run_cmd('mkdir ~/.go')
         run_cmd('mkdir ~/.go/bin')
         run_cmd('mkdir ~/.go/src')
@@ -67,11 +67,11 @@ class Develop:
         run_cmd('echo -e "export GOROOT=/usr/lib/go\\nexport GOPATH=~/Documents/go\\nexport GOBIN=~/Documents/go/bin\\nexport PATH=$PATH:$GOROOT/bin:$GOBIN\\n" >> ~/.xprofile')
         run_cmd('source ~/.xprofile')
         run_cmd('go env -w GOPROXY=https://goproxy.io,direct')
-        run_cmd('sudo pacman -S goland-jre goland')
+        run_cmd('sudo pacman -S --noconfirm goland-jre goland')
     
     @just_run("安装docker")
     def set_docker(self):
-        run_cmd('sudo pacman -S docker')
+        run_cmd('sudo pacman -S --noconfirm docker')
         run_cmd('sudo gpasswd -a ${USER} docker')
         run_cmd("sudo mkdir /etc/docker")
         run_cmd("sudo touch /etc/docker/daemon.json")
@@ -82,42 +82,42 @@ class Develop:
 class Software:
     @just_run("安装virtualbox")
     def set_virtualbox(self):
-        run_cmd('sudo pacman -S virtualbox virtualbox-ext-oracle virtualbox-guest-iso net-tools')
+        run_cmd('sudo pacman -S --noconfirm virtualbox virtualbox-ext-oracle virtualbox-guest-iso net-tools')
 
     @just_run("安装telegram")
     def set_telegram(self):
-        run_cmd('sudo pacman -S telegram-desktop')
+        run_cmd('sudo pacman -S --noconfirm telegram-desktop')
     
     @just_run("安装google-chrome")
     def set_chrome(self):
-        run_cmd('yay -S google-chrome')
+        run_cmd('yay -S --noconfirm google-chrome')
     
     @just_run("安装typora")
     def set_typora(self):
-        run_cmd("sudo pacman -S typora")
+        run_cmd("sudo pacman -S --noconfirm typora")
     
     @just_run("安装vscode")
     def set_vscode(self):
-        run_cmd("yay -S visual-studio-code-bin")
+        run_cmd("yay -S --noconfirm visual-studio-code-bin")
     
     @just_run("安装qq音乐")
     def set_qqmusic(self):
-        run_cmd("yay -S qqmusic-bin")
+        run_cmd("yay -S --noconfirm qqmusic-bin")
     
 
 # 4. 美化
 class Beauty:
     @just_run("安装papirus图标主题")
     def set_icon_theme(self):
-        run_cmd("sudo pacman -S papirus-icon-theme")
+        run_cmd("sudo pacman -S --noconfirm papirus-icon-theme")
     
     @just_run("安装layan全局主题")
     def set_layan_theme(self):
-        run_cmd("yay -S layan-kde-git")
+        run_cmd("yay -S --noconfirm layan-kde-git")
     
     @just_run("安装tela-2k grub主题")
     def set_grub_theme(self):
-        run_cmd("yay -S grub-theme-tela-color-2k-git")
+        run_cmd("yay -S --noconfirm grub-theme-tela-color-2k-git")
 
 def main():
     base = BaseConfig()
