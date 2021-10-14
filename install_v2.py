@@ -137,7 +137,6 @@ class Config:
         i = 1
         username_list = []
         while True:
-            user = {}
             print_purple(f"Please input the {i} user's name")
             username = input(">>> ")
             while username == "root" or username in username_list:
