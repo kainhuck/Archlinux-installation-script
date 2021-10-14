@@ -4,9 +4,14 @@
 # The install script for Archlinux installation
 # =============================================
 
+import os
+import sys
+
 support_shells = ("bash", "zsh", "fish")
 support_desktops = ("gnome", "plasma")
 support_language = ("en", "zh")
+
+base_packages = "base base-devel linux linux-firmware vim openssh zsh fish git wget curl grub dhcpcd net-tools"
 
 
 def print_red(a, end="\n"):
@@ -224,6 +229,15 @@ class Config:
         print_blue("===========================")
 
 
+def run_cmd(cmd: str):
+    print_cyan("[RUN] ", end="")
+    print_yellow(cmd)
+    code = os.system(cmd)
+    if code != 0:
+        print_red("exit")
+        sys.exit(code)
+
+
 def main():
     cfg = Config()
     cfg.set_disk_mount()
@@ -233,7 +247,24 @@ def main():
     cfg.set_language()
     cfg.set_swap_size()
     cfg.set_hostname()
+    print_purple("All config is finish, please check the info below")
     cfg.print_info()
+    print_yellow("Install process will clear all data in disk, are you sure going on? [N/y]")
+    ys = input(">>> ").lower()
+    if ys != "y":
+        print_yellow("Quit")
+        return
+
+    # packages
+    global base_packages
+    if cfg.boot_way == "UEFI":
+        base_packages += " efibootmgr"
+
+    if cfg.desktop == "gnome":
+        base_packages += " networkmanager xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics ttf-dejavu wqy-microhei gdm gnome gnome-extra"
+    elif cfg.desktop == "plasma":
+        base_packages += " networkmanager xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics ttf-dejavu wqy-microhei plasma kde-applications libdbusmenu-glib appmenu-gtk-module packagekit-qt5"
+
 
 
 if __name__ == '__main__':
