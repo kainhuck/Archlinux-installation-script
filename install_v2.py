@@ -265,6 +265,5 @@ def main():
         base_packages += " networkmanager xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics ttf-dejavu wqy-microhei plasma kde-applications libdbusmenu-glib appmenu-gtk-module packagekit-qt5"
 
 
-
 if __name__ == '__main__':
     main()
