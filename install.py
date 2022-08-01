@@ -29,7 +29,7 @@ def just_run(prompt: str):
 
 @just_run("检查平台")
 def check_platform():
-    if not platform.uname()[0] == "Linux" and platform.uname()[1] == "archiso":
+    if platform.uname().system != "Linux" or platform.uname().node != "archiso":
          print("This script only for archlinux installation")
          sys.exit(0)
 
