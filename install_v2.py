@@ -75,7 +75,7 @@ def run_cmd(cmd: str, debug:bool=True, exit:bool=True) -> str:
 
 
 def choose_from_list(subject:str, items:list) -> object:
-    print("%s" % apply_purple(f"please choose a {subject} from bellow"))
+    print("%s" % apply_purple(f"please choose a [{subject}] from bellow"))
     for i, d in enumerate(items):
         print("%s. %s" % (apply_yellow(i), apply_cyan(d)))
     while True:
@@ -123,6 +123,7 @@ class Config:
         self._detect_cpu_vendor()
 
         self.set_install_disk()
+        self.set_desktop()
     
     def _detect_platform(self):
         """自动检测平台，是否是archlinux安装环境"""
