@@ -15,7 +15,7 @@ import subprocess
 # =================================== global values ====================================
 
 support_shells = ("bash", "zsh", "fish")
-support_desktops = ("gnome", "plasma")
+support_desktops = ("no_desktop", "gnome", "plasma")
 support_language = ("en", "zh")
 
 base_packages = "base base-devel linux linux-firmware vim openssh zsh fish git wget curl grub dhcpcd net-tools"
@@ -74,6 +74,25 @@ def run_cmd(cmd: str, debug:bool=True, exit:bool=True) -> str:
     return output
 
 
+def choose_from_list(subject:str, items:list) -> object:
+    print("%s" % apply_purple(f"please choose a {subject} from bellow"))
+    for i, d in enumerate(items):
+        print("%s. %s" % (apply_yellow(i), apply_cyan(d)))
+    while True:
+        n = input(apply_blue("please choose a number >>> "))
+        try:
+            n = int(n)
+        except:
+            print("%s" % apply_red("invalid input"))
+            continue
+
+        if n > len(items) - 1:
+            print("%s" % apply_red("invalid input"))
+            continue
+        else:
+            return items[n]
+
+
 class DiskMount:
     def __init__(self, disk:str, mount_point:str):
         self.disk = disk
@@ -99,9 +118,11 @@ class Config:
         self.swap_size = None
         self.hostname = None
 
-        # self._detect_platform()
+        self._detect_platform()
         self._detect_boot()
         self._detect_cpu_vendor()
+
+        self.set_install_disk()
     
     def _detect_platform(self):
         """自动检测平台，是否是archlinux安装环境"""
@@ -120,7 +141,8 @@ class Config:
         """自动检测CPU类型"""
         self.cpu_vendor = run_cmd("lscpu | grep Vendor | awk '{print $3}'", False, False)
 
-    def set_disk_mount(self):
+    def set_install_disk(self):
+        """设置安装磁盘"""
         all_disk = run_cmd("fdisk -l | grep 'Disk /dev/' | awk '{print $2}'", False, True).split("\n")
         real_disks = []
         for d in all_disk:
@@ -135,30 +157,16 @@ class Config:
         elif len(real_disks) == 1:
             self.install_disk = real_disks[0]
         else:
-            print("%s" % apply_purple("please choose a disk from bellow"))
-            for i, d in enumerate(real_disks):
-                print("%s. %s" % (apply_yellow(i), apply_cyan(d)))
-            while True:
-                n = input(apply_blue("please choose a number >>> "))
-                try:
-                    n = int(n)
-                except:
-                    print("%s" % apply_red("invalid input"))
-                    continue
+            self.install_disk = choose_from_list("disk", real_disks)
+    
+    def set_desktop(self):
+        """设置桌面环境"""
+        self.desktop = choose_from_list("desktop", support_desktops)
 
-                if n > len(real_disks) - 1:
-                    print("%s" % apply_red("invalid input"))
-                    continue
-                else:
-                    self.install_disk = real_disks[0]
-                    break
+# ======================================================================================
 
 def main():
     cfg = Config()
-    cfg.set_disk_mount()
-
-    print(cfg.boot)
-    print(cfg.cpu_vendor)
 
     # cfg.set_desktop()
     # cfg.set_root_password()
