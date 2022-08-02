@@ -264,9 +264,9 @@ class Installation:
         if self.cfg.boot == UEFI:
             part = disk_partition("d", "", "d", "", "d", "", "d", "", "d", "", "d", "", "d", "",  # 删除现有分区
                                   "g",  # 新建gpt分区表
-                                  "n", "", "", "+512M",  # 新建EFI分区/boot分区
-                                  "n", "", "", f"+{self.cfg.swap_size}G",  # swap分区
-                                  "n", "", "", "",  # 根分区
+                                  "n", "", "", "", "+512M",  # 新建EFI分区/boot分区
+                                  "n", "", "", "", f"+{self.cfg.swap_size}G",  # swap分区
+                                  "n", "", "", "", "",  # 根分区
                                   "w"  # 写入
                                   )
             run_cmd(part+self.cfg.install_disk)
@@ -282,9 +282,9 @@ class Installation:
         elif self.cfg.boot == BIOS:
             part = disk_partition("d", "", "d", "", "d", "", "d", "", "d", "", "d", "", "d", "",  # 删除现有分区
                                   "o",  # 新建mbr分区表
-                                  "n", "", "", "", "+512M", "Y",  # 新建EFI分区/boot分区
-                                  "n", "", "", "", f"+{self.cfg.swap_size}G", "Y",  # swap分区
-                                  "n", "", "", "", "", "Y",  # 根分区
+                                  "n", "", "", "", "+512M",  # 新建EFI分区/boot分区
+                                  "n", "", "", "", f"+{self.cfg.swap_size}G",  # swap分区
+                                  "n", "", "", "", "",  # 根分区
                                   "w"  # 写入
                                   )
             run_cmd(part+self.cfg.install_disk)
