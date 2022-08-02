@@ -74,6 +74,18 @@ def run_cmd(cmd: str, debug: bool = True, exit_: bool = True) -> str:
     return output
 
 
+def run_cmd_chroot(cmd: str, debug: bool = True, exit_: bool = True) -> str:
+    run_cmd(f"arch-chroot /mnt {cmd}", debug, exit_)
+
+
+def disk_partition(*ops):
+    cmd_format = 'echo -e "{args}" | fdisk '
+    args = []
+    for p in ops:
+        args.append(f"{p}\\n")
+    return cmd_format.format(args="".join(args))
+
+
 def read_str(prompt: str) -> str:
     s = input(apply_blue(f"{prompt} >>> "))
 
@@ -238,6 +250,141 @@ class Config:
             print("{}: {}".format(apply_blue(f"SHELL{i + 1}"), apply_green(f"{u.shell}")))
 
 
+class Installation:
+    def __init__(self, cfg: Config):
+        self.cfg = cfg
+
+    @staticmethod
+    def update_time():
+        """更新系统时间"""
+        run_cmd("timedatectl set-ntp true")
+
+    def disk_part(self):
+        """磁盘分区"""
+        if self.cfg.boot == UEFI:
+            part = disk_partition("d", "", "d", "", "d", "", "d", "", "d", "", "d", "", "d", "",  # 删除现有分区
+                                  "g",  # 新建gpt分区表
+                                  "n", "", "", "+512M",  # 新建EFI分区/boot分区
+                                  "n", "", "", f"+{self.cfg.swap_size}G",  # swap分区
+                                  "n", "", "", "",  # 根分区
+                                  "w"  # 写入
+                                  )
+            run_cmd(part+self.cfg.install_disk)
+            # 格式化
+            run_cmd(f"mkfs.vfat {self.cfg.install_disk}1")
+            run_cmd(f"mkswap {self.cfg.install_disk}2")
+            run_cmd(f"mkfs.ext4 {self.cfg.install_disk}3")
+            # 挂载
+            run_cmd(f"mount {self.cfg.install_disk}3 /mnt")
+            run_cmd("mkdir -p /mnt/boot/EFI")
+            run_cmd(f"mount {self.cfg.install_disk}1 /mnt/boot/EFI")
+            run_cmd(f"swapon {self.cfg.install_disk}2")
+        elif self.cfg.boot == BIOS:
+            part = disk_partition("d", "", "d", "", "d", "", "d", "", "d", "", "d", "", "d", "",  # 删除现有分区
+                                  "o",  # 新建mbr分区表
+                                  "n", "", "", "", "+512M", "Y",  # 新建EFI分区/boot分区
+                                  "n", "", "", "", f"+{self.cfg.swap_size}G", "Y",  # swap分区
+                                  "n", "", "", "", "", "Y",  # 根分区
+                                  "w"  # 写入
+                                  )
+            run_cmd(part+self.cfg.install_disk)
+            # 格式化
+            run_cmd(f"mkfs.ext2 {self.cfg.install_disk}1")
+            run_cmd(f"mkswap {self.cfg.install_disk}2")
+            run_cmd(f"mkfs.ext4 {self.cfg.install_disk}3")
+            # 挂载
+            run_cmd(f"mount {self.cfg.install_disk}3 /mnt")
+            run_cmd("mkdir -p /mnt/boot")
+            run_cmd(f"mount {self.cfg.install_disk}1 /mnt/boot")
+            run_cmd(f"swapon {self.cfg.install_disk}2")
+        else:
+            print("{}".format(apply_red(f"unsupported boot {self.cfg.boot}")))
+            sys.exit(0)
+
+    def download_linux(self):
+        packages = base_packages
+        if self.cfg.cpu_vendor == CPU_AMD:
+            packages += " amd-ucode"
+        elif self.cfg.cpu_vendor == CPU_INTEL:
+            packages += " intel-ucode"
+
+        if self.cfg.boot == UEFI:
+            packages += " efibootmgr"
+
+        if self.cfg.desktop == "gnome":
+            packages += " networkmanager xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics ttf-dejavu wqy-microhei gdm gnome gnome-extra"
+        elif self.cfg.desktop == "plasma":
+            packages += " networkmanager xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics ttf-dejavu wqy-microhei plasma kde-applications libdbusmenu-glib appmenu-gtk-module packagekit-qt5"
+
+        run_cmd("pacstrap /mnt " + packages)
+
+    @staticmethod
+    def gen_fstab():
+        """生成fstab文件"""
+        run_cmd("genfstab -U /mnt >> /mnt/etc/fstab")
+
+    @staticmethod
+    def set_timezone():
+        """设置时区"""
+        run_cmd_chroot("ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime")
+        run_cmd_chroot("hwclock --systohc")
+
+    @staticmethod
+    def set_locale():
+        """本地化设置"""
+        run_cmd_chroot("sed -in-place -e 's/#zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/g' /etc/locale.gen")
+        run_cmd_chroot("sed -in-place -e 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen")
+        run_cmd_chroot("locale-gen")
+        run_cmd_chroot('echo "LANG=en_US.UTF-8" > /etc/locale.conf')
+
+    def set_hostname(self):
+        """设置hostname"""
+        run_cmd_chroot(f'echo "{self.cfg.hostname}" > /etc/hostname')
+        run_cmd_chroot('''tee /etc/hosts <<-'EOF'\n127.0.0.1	localhost\n::1		localhost\nEOF''')
+
+    def set_network(self):
+        """网络设置"""
+        run_cmd_chroot("systemctl enable dhcpcd")
+        if self.cfg.desktop != "no_desktop":
+            run_cmd_chroot("systemctl enable NetworkManager")
+
+    def set_user(self):
+        """用户设置"""
+        run_cmd_chroot(f"sh -c \"echo 'root:{self.cfg.root_passwd}' | chpasswd\"")
+
+        for u in self.cfg.common_users:
+            run_cmd_chroot(f"useradd -m -G wheel -s /bin/{u.shell} {u.name}")
+            run_cmd_chroot(f"sh -c \"echo '{u.name}:{u.passwd}' | chpasswd\"")
+
+        run_cmd_chroot("sed -in-place -e 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers")
+
+    def set_grub(self):
+        """引导设置"""
+        if self.cfg.boot == UEFI:
+            run_cmd_chroot("grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=GRUB")
+            run_cmd_chroot("grub-mkconfig -o /boot/grub/grub.cfg")
+        elif self.cfg.boot == BIOS:
+            run_cmd_chroot(f"grub-install {self.cfg.install_disk}")
+            run_cmd_chroot("grub-mkconfig -o /boot/grub/grub.cfg")
+
+    def set_desktop(self):
+        """设置桌面环境"""
+        if self.cfg.desktop == "no_desktop":
+            return
+
+        run_cmd_chroot(f"sh -c \"echo 'LANG=zh_CN.UTF-8' > /etc/locale.conf\"")
+        if self.cfg.desktop == "gnome":
+            run_cmd_chroot("systemctl enable gdm")
+        elif self.cfg.desktop == "plasma":
+            run_cmd_chroot("systemctl enable sddm")
+
+    @staticmethod
+    def finish():
+        """一些收尾工作"""
+        run_cmd_chroot("systemctl enable sshd")
+        run_cmd("umount -R /mnt")
+
+
 # ======================================================================================
 
 def main():
@@ -245,29 +392,27 @@ def main():
     print("{}".format(apply_yellow("========= please check info ========")))
     cfg.print_info()
     print("{}".format(apply_yellow("====================================")))
-    # cfg.set_desktop()
-    # cfg.set_root_password()
-    # cfg.set_common_users()
-    # cfg.set_language()
-    # cfg.set_swap_size()
-    # cfg.set_hostname()
-    # print_purple("All config is finish, please check the info below")
-    # cfg.print_info()
-    # print_yellow("Install process will clear all data in disk, are you sure going on? [N/y]")
-    # ys = input(">>> ").lower()
-    # if ys != "y":
-    #     print_yellow("Quit")
-    #     return
 
-    # packages
-    # global base_packages
-    # if cfg.boot == "UEFI":
-    #     base_packages += " efibootmgr"
+    yn = read_str("ready to install [y/n]")
+    if yn.lower() != "y":
+        return
 
-    # if cfg.desktop == "gnome":
-    #     base_packages += " networkmanager xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics ttf-dejavu wqy-microhei gdm gnome gnome-extra"
-    # elif cfg.desktop == "plasma":
-    #     base_packages += " networkmanager xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics ttf-dejavu wqy-microhei plasma kde-applications libdbusmenu-glib appmenu-gtk-module packagekit-qt5"
+    install = Installation(cfg)
+
+    install.update_time()
+    install.disk_part()
+    install.download_linux()
+    install.gen_fstab()
+    install.set_timezone()
+    install.set_locale()
+    install.set_hostname()
+    install.set_network()
+    install.set_user()
+    install.set_grub()
+    install.set_desktop()
+    install.finish()
+
+    print("{}".format(apply_green("install successfully please reboot your computer")))
 
 
 if __name__ == '__main__':
