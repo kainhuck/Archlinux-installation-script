@@ -133,11 +133,11 @@ class Config:
         self.boot = None
         self.cpu_vendor = None
         self.install_disk = None
-        self.disk_mount = []    # DiskMount TODO
+        self.disk_mount = []  # DiskMount TODO
         self.desktop = None
         self.root_passwd = None
         self.common_users = []  # User
-        self.language = None    # TODO
+        self.language = None  # TODO
         self.swap_size = None
         self.hostname = None
 
@@ -222,12 +222,29 @@ class Config:
         """设置hostname"""
         self.hostname = read_str("please set hostname")
 
+    def print_info(self):
+        print("{}: {}".format(apply_blue("BOOT"), apply_green(f"{self.boot}")))
+        print("{}: {}".format(apply_blue("CPU"), apply_green(f"{self.cpu_vendor}")))
+        print("{}: {}".format(apply_blue("INSTALLATION"), apply_green(f"{self.install_disk}")))
+        print("{}: {}".format(apply_blue("DESKTOP"), apply_green(f"{self.desktop}")))
+        print("{}: {}".format(apply_blue("HOSTNAME"), apply_green(f"{self.hostname}")))
+        print("{}: {}".format(apply_blue("SWAP_SIZE"), apply_green(f"{self.swap_size}G")))
+        print("{}: {}".format(apply_blue("ROOT_PASSWORD"), apply_green(f"{self.root_passwd}")))
+
+        for i, u in enumerate(self.common_users):
+            assert isinstance(u, User)
+            print("{}: {}".format(apply_blue(f"USER{i + 1}"), apply_green(f"{u.name}")))
+            print("{}: {}".format(apply_blue(f"PASSWORD{i + 1}"), apply_green(f"{u.passwd}")))
+            print("{}: {}".format(apply_blue(f"SHELL{i + 1}"), apply_green(f"{u.shell}")))
+
 
 # ======================================================================================
 
 def main():
     cfg = Config()
-
+    print("{}".format(apply_yellow("========= please check info ========")))
+    cfg.print_info()
+    print("{}".format(apply_yellow("====================================")))
     # cfg.set_desktop()
     # cfg.set_root_password()
     # cfg.set_common_users()
