@@ -133,11 +133,11 @@ class Config:
         self.boot = None
         self.cpu_vendor = None
         self.install_disk = None
-        self.disk_mount = []  # DiskMount
+        self.disk_mount = []    # DiskMount TODO
         self.desktop = None
         self.root_passwd = None
         self.common_users = []  # User
-        self.language = None
+        self.language = None    # TODO
         self.swap_size = None
         self.hostname = None
 
@@ -148,6 +148,7 @@ class Config:
         self.set_install_disk()
         self.set_desktop()
         self.set_root_passwd()
+        self.set_common_users()
         self.set_swap_size()
         self.set_hostname()
 
@@ -194,6 +195,24 @@ class Config:
     def set_root_passwd(self):
         """设置root用户密码"""
         self.root_passwd = read_str("please set root's password")
+
+    def set_common_users(self):
+        """设置普通用户"""
+        yn = read_str("need common users? [y/n]")
+        if yn.lower() != "y":
+            return
+        while True:
+            name = read_str("please input username")
+            if name == "root" or name in [item.name for item in self.common_users]:
+                print("{}".format(apply_red(f"{name} already taken")))
+                continue
+            passwd = read_str(f"please input password for {name}")
+            shell = choose_from_list(f"shell for {name}", support_shells)
+            assert isinstance(shell, str)
+            self.common_users.append(User(name, passwd, shell))
+            yn = read_str("need another user? [y/n]")
+            if yn.lower() != "y":
+                return
 
     def set_swap_size(self):
         """设置 swap 大小"""
