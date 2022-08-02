@@ -180,7 +180,7 @@ class Config:
 
     def _detect_cpu_vendor(self):
         """自动检测CPU类型"""
-        self.cpu_vendor = run_cmd("lscpu | grep Vendor | awk '{print $3}'", False, False)
+        self.cpu_vendor = run_cmd("lscpu | grep Vendor | grep -v BIOS | awk '{print $3}'", False, False)
 
     def set_install_disk(self):
         """设置安装磁盘"""
