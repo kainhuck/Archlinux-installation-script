@@ -389,7 +389,7 @@ class Installation:
             run_cmd_chroot(f"useradd -m -G wheel -s /bin/{u.shell} {u.name}")
             run_cmd_chroot(f"sh -c \"echo '{u.name}:{u.passwd}' | chpasswd\"")
 
-        run_cmd_chroot("sed -in-place -e 's/# %wheel ALL=(ALL) ALL/%wheel ALL=(ALL) ALL/g' /etc/sudoers")
+        run_cmd_chroot("sed -in-place -e 's/# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/g' /etc/sudoers")
 
     def set_grub(self):
         """引导设置"""
