@@ -231,6 +231,12 @@ class Config:
         self.desktop = choose_from_list("desktop", support_desktops)
         if self.desktop != NODESKTOP:
             self.packages.extend(desktop_base_packages)
+
+            if self.cpu_vendor == CPU_AMD:
+                self.packages.append("xf86-video-amdgpu")
+            elif self.cpu_vendor == CPU_INTEL:
+                self.packages.append("xf86-video-intel")
+
             if self.desktop == GNOME_DESKTOP:
                 self.packages.extend(gnome_packages)
             elif self.desktop == PLASMA_DESKTOP:
@@ -288,11 +294,11 @@ class Installation:
 
     @staticmethod
     def set_mirror():
-        run_cmd("sed -i '1i\Server = http://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch\nServer = https://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch' /etc/pacman.d/mirrorlist")
+        run_cmd("sed -i '1i\Server = http://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch\\nServer = https://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch' /etc/pacman.d/mirrorlist")
 
     @staticmethod
     def install_keyring():
-        run_cmd("pacman -Sy archlinux-keyring", stdout=True)
+        run_cmd("yes | pacman -Sy archlinux-keyring", stdout=True)
 
     @staticmethod
     def update_time():
