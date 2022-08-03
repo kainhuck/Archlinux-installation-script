@@ -26,7 +26,7 @@ support_desktops = [NODESKTOP, GNOME_DESKTOP, PLASMA_DESKTOP]
 support_language = ["en", "zh"]
 
 base_packages = ["base", "base-devel", "linux", "linux-firmware", "vim", "openssh", "zsh", "fish", "git", "wget", "curl", "grub", "dhcpcd", "net-tools"]
-desktop_base_packages = ["networkmanager", "xorg", "alsa-utils", "pulseaudio", "pulseaudio-alsa", "xf86-input-synaptics", "ttf-dejavu wqy-microhei"]
+desktop_base_packages = ["networkmanager", "xorg", "alsa-utils", "mesa", "pulseaudio", "pulseaudio-alsa", "xf86-input-synaptics", "ttf-dejavu wqy-microhei"]
 gnome_packages = ["gdm", "gnome", "gnome-extra"]
 plasma_packages = ["plasma", "kde-applications", "libdbusmenu-glib", "appmenu-gtk-module", "packagekit-qt5"]
 efi_packages = ["efibootmgr"]
