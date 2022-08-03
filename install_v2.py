@@ -169,6 +169,7 @@ class Config:
         self.packages = base_packages
 
         self._detect_platform()
+        self._detect_network()
         self._detect_boot()
         self._detect_cpu_vendor()
 
@@ -185,6 +186,11 @@ class Config:
         if platform.uname().system != "Linux" or platform.uname().node != "archiso":
             print("{}".format(apply_red("This script only for archlinux installation")))
             sys.exit(0)
+
+    @staticmethod
+    def _detect_network():
+        """检查是否联网"""
+        run_cmd("ping -c 3 www.baidu.com", debug=False)
 
     def _detect_boot(self):
         """自动检测启动类型"""
