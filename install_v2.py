@@ -287,6 +287,14 @@ class Installation:
         self.cfg = cfg
 
     @staticmethod
+    def set_mirror():
+        run_cmd("sed -i '1i\Server = http://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch\nServer = https://mirrors.ustc.edu.cn/archlinux/$repo/os/$arch' /etc/pacman.d/mirrorlist")
+
+    @staticmethod
+    def install_keyring():
+        run_cmd("pacman -Sy archlinux-keyring", stdout=True)
+
+    @staticmethod
     def update_time():
         """更新系统时间"""
         run_cmd("timedatectl set-ntp true")
@@ -418,6 +426,8 @@ def main():
 
     install = Installation(cfg)
 
+    install.set_mirror()
+    install.install_keyring()
     install.update_time()
     install.disk_part()
     install.download_linux()
