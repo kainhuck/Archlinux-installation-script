@@ -11,17 +11,27 @@ import subprocess
 
 # =================================== global values ====================================
 
-support_shells = ["bash", "zsh", "fish"]
-support_desktops = ["no_desktop", "gnome", "plasma"]
-support_language = ["en", "zh"]
-
-base_packages = "base base-devel linux linux-firmware vim openssh zsh fish git wget curl grub dhcpcd net-tools"
+NODESKTOP = "no_desktop"
+GNOME_DESKTOP = "gnome"
+PLASMA_DESKTOP = "plasma"
 
 UEFI = "UEFI"
 BIOS = "BIOS"
 
 CPU_AMD = "AuthenticAMD"
 CPU_INTEL = "GenuineIntel"
+
+support_shells = ["bash", "zsh", "fish"]
+support_desktops = [NODESKTOP, GNOME_DESKTOP, PLASMA_DESKTOP]
+support_language = ["en", "zh"]
+
+base_packages = ["base", "base-devel", "linux", "linux-firmware", "vim", "openssh", "zsh", "fish", "git", "wget", "curl", "grub", "dhcpcd", "net-tools"]
+desktop_base_packages = ["networkmanager", "xorg", "alsa-utils", "pulseaudio", "pulseaudio-alsa", "xf86-input-synaptics", "ttf-dejavu wqy-microhei"]
+gnome_packages = ["gdm", "gnome", "gnome-extra"]
+plasma_packages = ["plasma", "kde-applications", "libdbusmenu-glib", "appmenu-gtk-module", "packagekit-qt5"]
+efi_packages = ["efibootmgr"]
+intel_packages = ["intel-ucode"]
+amd_packages = ["amd-ucode"]
 
 
 # ======================================================================================
@@ -152,6 +162,7 @@ class Config:
         self.language = None  # TODO
         self.swap_size = None
         self.hostname = None
+        self.packages = base_packages
 
         self._detect_platform()
         self._detect_boot()
@@ -175,12 +186,17 @@ class Config:
         """自动检测启动类型"""
         if os.path.exists("/sys/firmware/efi/efivars"):
             self.boot = UEFI
+            self.packages.extend(efi_packages)
         else:
             self.boot = BIOS
 
     def _detect_cpu_vendor(self):
         """自动检测CPU类型"""
         self.cpu_vendor = run_cmd("lscpu | grep Vendor | grep -v BIOS | awk '{print $3}'", False, False)
+        if self.cpu_vendor == CPU_AMD:
+            self.packages.extend(amd_packages)
+        elif self.cpu_vendor == CPU_INTEL:
+            self.packages.extend(intel_packages)
 
     def set_install_disk(self):
         """设置安装磁盘"""
@@ -203,6 +219,12 @@ class Config:
     def set_desktop(self):
         """设置桌面环境"""
         self.desktop = choose_from_list("desktop", support_desktops)
+        if self.desktop != NODESKTOP:
+            self.packages.extend(desktop_base_packages)
+            if self.desktop == GNOME_DESKTOP:
+                self.packages.extend(gnome_packages)
+            elif self.desktop == PLASMA_DESKTOP:
+                self.packages.extend(plasma_packages)
 
     def set_root_passwd(self):
         """设置root用户密码"""
@@ -302,20 +324,7 @@ class Installation:
             sys.exit(0)
 
     def download_linux(self):
-        packages = base_packages
-        if self.cfg.cpu_vendor == CPU_AMD:
-            packages += " amd-ucode"
-        elif self.cfg.cpu_vendor == CPU_INTEL:
-            packages += " intel-ucode"
-
-        if self.cfg.boot == UEFI:
-            packages += " efibootmgr"
-
-        if self.cfg.desktop == "gnome":
-            packages += " networkmanager xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics ttf-dejavu wqy-microhei gdm gnome gnome-extra"
-        elif self.cfg.desktop == "plasma":
-            packages += " networkmanager xorg alsa-utils pulseaudio pulseaudio-alsa xf86-input-synaptics ttf-dejavu wqy-microhei plasma kde-applications libdbusmenu-glib appmenu-gtk-module packagekit-qt5"
-
+        packages = " ".join(self.cfg.packages)
         run_cmd("pacstrap /mnt " + packages)
 
     @staticmethod
@@ -369,13 +378,13 @@ class Installation:
 
     def set_desktop(self):
         """设置桌面环境"""
-        if self.cfg.desktop == "no_desktop":
+        if self.cfg.desktop == NODESKTOP:
             return
 
         run_cmd_chroot(f"sh -c \"echo 'LANG=zh_CN.UTF-8' > /etc/locale.conf\"")
-        if self.cfg.desktop == "gnome":
+        if self.cfg.desktop == GNOME_DESKTOP:
             run_cmd_chroot("systemctl enable gdm")
-        elif self.cfg.desktop == "plasma":
+        elif self.cfg.desktop == PLASMA_DESKTOP:
             run_cmd_chroot("systemctl enable sddm")
 
     @staticmethod
