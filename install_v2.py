@@ -66,17 +66,21 @@ def apply_cyan(s) -> str:
 # ======================================================================================
 
 
-def run_cmd(cmd: str, debug: bool = True, exit_: bool = True) -> str:
+def run_cmd(cmd: str, debug: bool = True, exit_: bool = True, stdout: bool = False) -> str:
     if debug:
         print("{} {}".format(apply_cyan("[RUN]"), apply_yellow(cmd)))
 
-    code, output = subprocess.getstatusoutput(cmd)
+    if stdout:
+        code = os.system(cmd)
+        output = ""
+    else:
+        code, output = subprocess.getstatusoutput(cmd)
 
     try:
         assert code == 0
     except AssertionError:
         if exit_:
-            print("{}".format(apply_red(f"ERROR: {output}")))
+            print("{}".format(apply_red(f"RUN ERROR: {cmd}")))
             sys.exit(code)
         else:
             return ""
@@ -84,8 +88,8 @@ def run_cmd(cmd: str, debug: bool = True, exit_: bool = True) -> str:
     return output
 
 
-def run_cmd_chroot(cmd: str, debug: bool = True, exit_: bool = True) -> str:
-    run_cmd(f"arch-chroot /mnt {cmd}", debug, exit_)
+def run_cmd_chroot(cmd: str, debug: bool = True, exit_: bool = True, stdout: bool = False) -> str:
+    return run_cmd(f"arch-chroot /mnt {cmd}", debug, exit_, stdout)
 
 
 def disk_partition(*ops):
@@ -325,7 +329,7 @@ class Installation:
 
     def download_linux(self):
         packages = " ".join(self.cfg.packages)
-        run_cmd("pacstrap /mnt " + packages)
+        run_cmd("pacstrap /mnt " + packages, stdout=True)
 
     @staticmethod
     def gen_fstab():
@@ -343,7 +347,7 @@ class Installation:
         """本地化设置"""
         run_cmd_chroot("sed -in-place -e 's/#zh_CN.UTF-8 UTF-8/zh_CN.UTF-8 UTF-8/g' /etc/locale.gen")
         run_cmd_chroot("sed -in-place -e 's/#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen")
-        run_cmd_chroot("locale-gen")
+        run_cmd_chroot("locale-gen", stdout=True)
         run_cmd_chroot('echo "LANG=en_US.UTF-8" > /etc/locale.conf')
 
     def set_hostname(self):
@@ -354,7 +358,7 @@ class Installation:
     def set_network(self):
         """网络设置"""
         run_cmd_chroot("systemctl enable dhcpcd")
-        if self.cfg.desktop != "no_desktop":
+        if self.cfg.desktop != NODESKTOP:
             run_cmd_chroot("systemctl enable NetworkManager")
 
     def set_user(self):
@@ -370,10 +374,10 @@ class Installation:
     def set_grub(self):
         """引导设置"""
         if self.cfg.boot == UEFI:
-            run_cmd_chroot("grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=GRUB")
+            run_cmd_chroot("grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=GRUB", stdout=True)
             run_cmd_chroot("grub-mkconfig -o /boot/grub/grub.cfg")
         elif self.cfg.boot == BIOS:
-            run_cmd_chroot(f"grub-install {self.cfg.install_disk}")
+            run_cmd_chroot(f"grub-install {self.cfg.install_disk}", stdout=True)
             run_cmd_chroot("grub-mkconfig -o /boot/grub/grub.cfg")
 
     def set_desktop(self):
