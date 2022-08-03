@@ -12,21 +12,9 @@ archlinux的安装脚本，可选择`Gnome`或者`plasma`桌面（推荐选择 p
 安装脚本
 
 ```shell
-curl -LJO https://github.com/kainhuck/Archlinux-installation-script/releases/download/v2.0/install.py
+curl -LJO https://github.com/kainhuck/Archlinux-installation-script/releases/download/v3.0/install_v2.py
 
-chmod +x install.py
+chmod +x install_v2.py
 
-./install.py
-```
-
-安装后的配置脚本(针对kde桌面, 其他桌面按需修改)
-
-安装好ohmyzsh需输入exit推出ohmyzsh以进行下一步操作
-
-```shell
-curl -LJO https://github.com/kainhuck/Archlinux-installation-script/releases/download/v2.0/setup.py
-
-chmod +x install.py
-
-./install.py
+./install_v2.py
 ```
