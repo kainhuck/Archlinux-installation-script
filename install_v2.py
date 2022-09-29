@@ -298,7 +298,7 @@ class Installation:
 
     @staticmethod
     def install_keyring():
-        run_cmd("yes | pacman -Sy archlinux-keyring", stdout=True)
+        run_cmd("pacman -Sy --noconfirm archlinux-keyring", stdout=True)
 
     @staticmethod
     def update_time():
